@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="shortcut icon" href="https://s3.amazonaws.com/django-blog/ico/favicon_v2.ico">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-pie.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <style>
+
+    /* Footer */
+
+    .footer {
+        position:fixed;
+        bottom:0;
+        left:0;
+        width:100%;
+        height: 70px;
+        background-color: #D0DAEE;
+     }
+     .footer-content-right {
+        padding-right:40px;
+        margin-top:20px;
+        float:right;
+     }
+
+     .icon-style {
+        height:50px;
+        margin-left:10px;
+        margin-top:0px;
+	  margin-bottom:20px;
+
+    }
+
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial;
+            padding: 10px;
+            background: #f1f1f1;
+        }
+        /* Header/Blog Title */
+        .header {
+            padding: 0px;
+            text-align: center;
+            background: white;
+        }
+        .header h1 {
+            font-size: 30px;
+        }
+        /* Style the top navigation bar */
+        .topnav {
+            overflow: hidden;
+            background-color: #333;
+        }
+        /* Style the topnav links */
+        .topnav a {
+		font-family: Geometos;
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        /* Change color on hover */
+        .topnav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        /* Create two unequal columns that floats next to each other */
+        /* Left column */
+        .leftcolumn {
+            float: left;
+            width: 70%;
+        }
+        /* Right column */
+        .rightcolumn {
+            float: left;
+            width: 30%;
+            background-color: #f1f1f1;
+            padding-left: 20px;
+        }
+        /* Fake image */
+        .fakeimg {
+            background-color: #aaa;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        /* Add a card effect for articles */
+        .card {
+            background-color: white;
+            padding: 20px;
+            padding-top: 5px;
+            margin-top: 5px;
+        }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
+        @media screen and (max-width: 800px) {
+            .leftcolumn, .rightcolumn {
+                width: 100%;
+                padding: 0;
+            }
+        }
+        /* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+        @media screen and (max-width: 800px) {
+            .topnav a {
+                float: none;
+                width: 100%;
+            }
+        }
+        /* current state initialisation*/
+        #currentstate {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 40px;
+        }
+        html, body, #container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Css  Properties for Pallets Table */
+        table, th, td
+        {
+            border: solid 1px #ddd;
+            border-collapse: collapse;
+            padding: 2px 3px;
+            text-align: center;
+        }
+        th {
+            font-weight:bold;
+        }
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+
+        .idleState{
+        color:black;
+        background-color:#ffb90f;
+        }
+
+        .workingState{
+        color:black;
+        background-color:#66cd00;
+        }
+
+        .errorState{
+        color:black;
+        background-color:#ff4040;
+        }
+
+
+
+
+    </style>
+    <title>Measurement History: {{nID}}</title>
+</head>
+<body>
+    <div class="header"></div>
+    <div class="topnav">
+        <a href="/dashboard?nID={{nID}}">Dashboard</a>
+        <a href="/robot?nID={{nID}}">Robot Selection</a>
+        <a href="/event-history?nID={{nID}}">Alarms & Events History</a>
+    </div>
+    <div class="row">
+        <div class="leftcolumn">
+            <div class="card">
+              <form>
+                <p>
+                <label for="StartV">Enter the start date and time:</label>
+                  <input
+                    id="StartV"
+                    type="datetime-local"
+                    name="Start"
+                    value="2022-11-26T17:00"
+                    min="2022-11-01T00:00"
+                    max="2023-01-31T00:00" />
+                </p>
+                <p>
+                <label for="EndV">Enter the end date and time:</label>
+                <input
+                  id="EndV"
+                  type="datetime-local"
+                  name="End"
+                  value="2022-11-26T19:00"
+                  min="2022-11-01T00:00"
+                  max="2023-01-31T00:00" />
+                </p>
+                <button
+                  type = "button"
+                  onclick = "getData()">Show Data</button>
+                <button
+                type = "button"
+                onclick = "getKPI()">Show KPI</button>
+                <p id="showData"></p>
+                  <p> <b></b> </p>
+             </form>
+
+            </div>
+
+        </div>
+        <div class="rightcolumn">
+            <div class="card">
+                <h2>Current State</h2>
+                <div id="currentState" style="height:100px;">State</div>
+            </div>
+
+            <div class="card">
+                <h3>Last time connected</h3>
+                <div id="lastTimeConnected" style="height:100px;">lastTimeConnected</div>
+            </div>
+            <div class="card">
+                <h3>Working</h3>
+                <div id="kpi1" style="height:100px;">KPI1</div>
+            </div>
+            <div class="card">
+                <h3>IDLE</h3>
+                <div id="kpi2" style="height:100px;">KPI2</div>
+            </div>
+
+            <div class="card">
+                <h3>DOWN</h3>
+                <div id="kpi3" style="height:100px;">KPI2</div>
+            </div>
+            <div class="card">
+                <div id="piechart" style="height:350px;width:100%;"></div>
+            </div>
+
+        </div>
+    </div>
+    <!--Footer-->
+
+        <div class="footer">
+		<div class="footer-content-right">
+        	<a href=""><img src="{{ url_for('static', filename='images/logo.png') }}" class="icon-style" alt="University Logo"></a>
+       </div>
+
+        </div>
+
+    <script>
+        google.charts.load('current', {'packages':['corechart']});
+
+        window.setInterval(function(){
+            lastTimeConnected();
+        }, 1000);
+
+        function lastTimeConnected(){
+            //Ajax request
+            console.log(window.location.pathname, window.location.href)
+            $.get('api/latestMessage/rob{{nID}}', function( data ) {
+
+                dataObj = JSON.parse(data);
+<!--                console.log("Latest state fetched from server");-->
+<!--                console.log(dataObj);-->
+                $('#lastTimeConnected').text(dataObj.timeDate);
+                $('#currentState').text(dataObj.state);
+            });
+         };
+        function getData(){
+          let endDT = $("#EndV").val();
+          let startDT = $("#StartV").val();
+          // let robID = nID;
+          endDT = new Date(endDT).getTime();
+          startDT = new Date(startDT).getTime() ;
+          console.log(endDT, startDT);
+          let url_history='api/historicalData/'+'rob'+'{{nID}}'+'/'+startDT/1000+'/'+endDT/1000;
+          let url_KPI='api/kpi/'+'rob'+'{{nID}}'+'/'+startDT/1000+'/'+endDT/1000;
+<!--          console.log(url_history);-->
+          console.log(url_KPI);
+          $.get(url_history,function (obj){
+<!--            console.log(obj)-->
+            data = JSON.parse(obj);
+            let head = ['State','Time Stamp']
+            let col = ['state','timeStamp']
+            if($.isEmptyObject(data)){
+               $( "b" ).append( "No Records to be shown, Please try another range");
+               removeTable('showData');
+            }else
+            {
+                removeTable('showData');
+                const table = document.createElement("table");
+
+                let tr = table.insertRow(-1);
+
+                for (let i = 0; i < head.length; i++)
+                {
+                  let th = document.createElement("th");      // table header.
+                  th.innerHTML = head[i];
+                  tr.appendChild(th);
+                }
+                for (let i = 0; i < data.length; i++)
+                {
+
+                  tr = table.insertRow(-1);
+
+                  for (let j = 0; j < col.length; j++)
+                  {
+                    let tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = data[i][col[j]];
+                  }
+                }
+
+                // Now, add the newly created table with json data, to a container.
+                const divShowData = document.getElementById('showData');
+                divShowData.innerHTML = "";
+                divShowData.appendChild(table);
+            }
+          });
+        }
+
+        function getKPI(){
+          let endDT = $("#EndV").val();
+          let startDT = $("#StartV").val();
+          // let robID = nID;
+          endDT = new Date(endDT).getTime();
+          startDT = new Date(startDT).getTime() ;
+          console.log(endDT, startDT);
+          let url_KPI='api/kpi/'+'rob'+'{{nID}}'+'/'+startDT/1000+'/'+endDT/1000;
+<!--          console.log(url_KPI);-->
+          $.get(url_KPI,function (data){
+                console.log(data);
+                dataObj = JSON.parse(data);
+                console.log("Latest state fetched from server");
+                console.log(dataObj);
+
+                $('#kpi1').text('Robot {{nID}} was working '+dataObj.percWork+'% of the time.');
+                $('#kpi2').text('Robot {{nID}} was idle '+dataObj.percIdle+'% of the time.');
+                $('#kpi3').text('Robot {{nID}} was down '+dataObj.percDown+'% of the time.');
+
+                var data = google.visualization.arrayToDataTable([
+                    ['Type', 'percentage'],
+                    ['Working', +(dataObj.percWork)],
+                    ['Idle', +(dataObj.percIdle)],
+                    ['Down', +(dataObj.percDown)],
+                    ]);
+
+                var options = {'title':'Time Percentage'};
+                var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                chart.draw(data, options);
+          });
+        }
+
+<!--       function drawChart() {-->
+<!--           let url_KPI='api/kpi/'+'rob'+'{{nID}}'+'/'+startDT/1000+'/'+endDT/1000;-->
+<!--           $.get(url_KPI,function (data)-->
+<!--           {-->
+<!--                    console.log(data);-->
+<!--                    dataObj = JSON.parse(data);-->
+<!--                    console.log("Latest state fetched from server");-->
+<!--                    console.log(dataObj);-->
+
+<!--                    var data = google.visualization.arrayToDataTable([-->
+<!--                    ['Working', +dataObj.percWork],-->
+<!--                    ['Idle', +dataObj.percIdle],-->
+<!--                    ['Down', +dataObj.percDown],-->
+<!--                    ]);-->
+<!--              });-->
+<!--           var options = {'title':'Time Percentage', 'width':550, 'height':400};-->
+<!--           var chart = new google.visualization.PieChart(document.getElementById('piechart'));-->
+<!--           chart.draw(data, options);-->
+<!--       }-->
+
+       function removeTable(id)
+       {
+        console.log("clearing table")
+	    var Table = document.getElementById(id);
+	    Table.innerHTML = "";
+       }
+            // history = JSON.parse(data);
+            // console.log('HI')
+            // let table_body = '';
+            //     data.forEach(function(row) {
+            //         let {value, ts} = row;
+            //         let date = (new Date(ts)).toISOString();
+            //         date = date.slice(0, 10) + " " + date.slice(11, 19)
+            //         if (value == 'DOWN') table_body = '<tr style="color: red"><td>' + date + '</td><td>' + value + '</td></tr>' + table_body;
+            //         else table_body = '<tr><td>' + date + '</td><td>' + value + '</td></tr>' + table_body;
+            //     });
+            //     let html_history =
+            //         '<table>' +
+            //             '<colgroup>' +
+            //                 '<col style="width: 150px">' +
+            //                 '<col style="width: 450px">' +
+            //             '</colgroup>'
+            //             '<thead>' +
+            //                 '<tr>' +
+            //                     '<td><p>Timestamp</p></td>' +
+            //                     '<td><p>State</p></td>' +
+            //                 '</tr>' +
+            //             '</thead>' +
+            //             '<tbody>';
+            //     html_history += table_body + '</table_body></table>';
+            //     $('#history_section').html(html_history);
+            // });
+            // {#$.get(url_robot_analysis, function (data) {#}
+            // {#    historical_data = JSON.parse(data);#}
+            // {# });#}
+
+    </script>
+<!--<script type="text/javascript">-->
+<!--// Load google charts-->
+<!--google.charts.load('current', {'packages':['corechart']});-->
+<!--google.charts.setOnLoadCallback(drawChart);-->
+
+<!--// Draw the chart and set the chart values-->
+<!--function drawChart() {-->
+<!--  var data = google.visualization.arrayToDataTable([-->
+<!--  ['Task', 'Hours per Day'],-->
+<!--  ['Work', 8],-->
+<!--  ['Eat', 2],-->
+<!--  ['TV', 4],-->
+<!--  ['Gym', 2],-->
+<!--  ['Sleep', 8]-->
+<!--]);-->
+
+<!--  // Optional; add a title and set the width and height of the chart-->
+<!--  var options = {'title':'My Average Day', 'width':550, 'height':400};-->
+
+<!--  // Display the chart inside the <div> element with id="piechart"-->
+<!--  var chart = new google.visualization.PieChart(document.getElementById('piechart'));-->
+<!--  chart.draw(data, options);-->
+<!--}-->
+</script>
+</body>
+</html>
