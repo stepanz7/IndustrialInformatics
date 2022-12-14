@@ -6,8 +6,8 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
-conn = sqlite3.connect(':memory:', check_same_thread= False)
-# conn = sqlite3.connect('database_testing.db', check_same_thread=False)
+# conn = sqlite3.connect(':memory:', check_same_thread= False)
+conn = sqlite3.connect('database_testing.db', check_same_thread=False)
 conn.row_factory = dict_factory
 database_name = "database"
 
